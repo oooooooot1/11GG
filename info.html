@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>معلومات وتخصيص الطرق - الرياض</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #4b0082;
+    }
+    .road-form {
+      display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
+    }
+    .form-group {
+      flex: 1; min-width: 200px;
+    }
+    .form-group label {
+      display: block; margin-bottom: 5px; font-weight: bold;
+    }
+    .form-group input {
+      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;
+      font-size: 1rem;
+    }
+    .road-form button {
+      padding: 10px 20px; background: #4b0082; color: #fff; border: none;
+      border-radius: 6px; cursor: pointer; font-size: 1rem;
+    }
+    .road-form button:hover {
+      background: #36005a;
+    }
+    .road-list {
+      max-height: 400px; overflow-y: auto;
+    }
+    .road-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f7f7f7; padding: 10px; border-radius: 6px; margin-bottom: 10px;
+    }
+    .road-item .info {
+      display: flex; flex-direction: column;
+    }
+    .road-item .info .name {
+      font-weight: bold; color: #4b0082;
+    }
+    .road-item .info .limit {
+      color: #555;
+    }
+    .road-item .actions {
+      display: flex; gap: 10px;
+    }
+    .road-item .actions button {
+      padding: 5px 10px; border: none; border-radius: 4px;
+      cursor: pointer; background: #e53e3e; color: #fff; font-size: 0.9rem;
+    }
+    .road-item .actions button.edit {
+      background: #3182ce;
+    }
+    .road-item .actions button:hover {
+      opacity: 0.8;
+    }
+    .back-link {
+      margin-top: 20px; text-align: center;
+      font-size: 1rem; color: #00c9ff; cursor: pointer; text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>معلومات وتخصيص الطرق</h1>
+    <div class="road-form">
+      <div class="form-group">
+        <label for="customName">اسم الطريق</label>
+        <input type="text" id="customName" placeholder="أدخل اسم الطريق">
+      </div>
+      <div class="form-group">
+        <label for="customLimit">السرعة الرسمية (كم/س)</label>
+        <input type="number" id="customLimit" placeholder="أدخل السرعة">
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button id="addBtn">إضافة</button>
+      </div>
+    </div>
+    <div class="road-list" id="roadList">
+      <!-- تظهر هنا طرقك المخصصة -->
+    </div>
+    <div class="back-link" id="backLink">عودة للعدادات</div>
+  </div>
+
+  <script>
+    let customRoads = JSON.parse(localStorage.getItem('customRoads')) || [];
+
+    function renderRoadList() {
+      const list = document.getElementById('roadList');
+      list.innerHTML = '';
+      if (customRoads.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#777;">لا توجد طرق مخصصة</p>';
+        return;
+      }
+      customRoads.forEach((road, idx) => {
+        const div = document.createElement('div');
+        div.className = 'road-item';
+        div.innerHTML = `
+          <div class="info">
+            <span class="name">${road.name}</span>
+            <span class="limit">${road.limit} كم/س</span>
+          </div>
+          <div class="actions">
+            <button data-idx="${idx}" class="use">استخدام</button>
+            <button data-idx="${idx}" class="edit">تعديل</button>
+            <button data-idx="${idx}" class="delete">حذف</button>
+          </div>`;
+        list.appendChild(div);
+      });
+      list.querySelectorAll('.use').forEach(btn => {
+        btn.onclick = () => {
+          // Save as currentRoad name in localStorage for index page
+          const idx = btn.dataset.idx;
+          localStorage.setItem('activeRoad', JSON.stringify(customRoads[idx]));
+          alert('تم اختيار الطريق الرئيسي: ' + customRoads[idx].name);
+        };
+      });
+      list.querySelectorAll('.edit').forEach(btn => {
+        btn.onclick = () => {
+          const idx = btn.dataset.idx;
+          document.getElementById('customName').value = customRoads[idx].name;
+          document.getElementById('customLimit').value = customRoads[idx].limit;
+          document.getElementById('addBtn').textContent = 'حفظ';
+          document.getElementById('addBtn').dataset.editIdx = idx;
+        };
+      });
+      list.querySelectorAll('.delete').forEach(btn => {
+        btn.onclick = () => {
+          const idx = btn.dataset.idx;
+          customRoads.splice(idx, 1);
+          localStorage.setItem('customRoads', JSON.stringify(customRoads));
+          renderRoadList();
+        };
+      });
+    }
+
+    document.getElementById('addBtn').onclick = () => {
+      const name = document.getElementById('customName').value.trim();
+      const limit = parseInt(document.getElementById('customLimit').value);
+      if (!name || isNaN(limit)) return;
+      if (document.getElementById('addBtn').dataset.editIdx != null) {
+        const idx = document.getElementById('addBtn').dataset.editIdx;
+        customRoads[idx] = { name, limit };
+        delete document.getElementById('addBtn').dataset.editIdx;
+        document.getElementById('addBtn').textContent = 'إضافة';
+      } else {
+        customRoads.push({ name, limit });
+      }
+      document.getElementById('customName').value = '';
+      document.getElementById('customLimit').value = '';
+      localStorage.setItem('customRoads', JSON.stringify(customRoads));
+      renderRoadList();
+    };
+
+    document.getElementById('backLink').onclick = () => {
+      window.location.href = 'index.html';
+    };
+
+    window.onload = () => {
+      renderRoadList();
+    };
+  </script>
+</body>
+</html>

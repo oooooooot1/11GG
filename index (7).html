@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>عداد السرعة - الرياض</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1c1c1c;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .gauges-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 900px;
+    }
+    .gauge {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+    .gauge svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .needle {
+      transform-origin: 50% 50%;
+      transition: transform 0.2s ease-out;
+    }
+    .gauge-center {
+      position: absolute;
+      width: 20px; height: 20px;
+      background: #444;
+      border: 4px solid #888;
+      border-radius: 50%;
+      top: calc(50% - 10px);
+      left: calc(50% - 10px);
+      z-index: 2;
+    }
+    .gauge-label {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      bottom: 10px;
+      font-size: 1.2rem;
+      color: #ffcc00;
+    }
+    .road-name {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      color: #00ffff;
+      text-align: center;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #92fe9d;
+      text-align: center;
+    }
+    .link-info {
+      margin-top: 20px;
+      font-size: 1rem;
+      color: #00c9ff;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="gauges-container">
+    <!-- Current Speed Gauge -->
+    <div class="gauge" id="currentGauge">
+      <svg viewBox="0 0 200 200">
+        <!-- Outer arc -->
+        <path d="M20,100 A80,80 0 0,1 180,100" stroke="#444" stroke-width="8" fill="none"/>
+        <!-- Ticks -->
+        <g id="ticksCurrent"></g>
+        <!-- Needle -->
+        <line x1="100" y1="100" x2="100" y2="20" stroke="#ff0000" stroke-width="4" class="needle" id="needleCurrent"/>
+      </svg>
+      <div class="gauge-center"></div>
+      <div class="gauge-label">السرعة الحالية</div>
+    </div>
+    <!-- Official Speed Gauge -->
+    <div class="gauge" id="officialGauge">
+      <svg viewBox="0 0 200 200">
+        <path d="M20,100 A80,80 0 0,1 180,100" stroke="#444" stroke-width="8" fill="none"/>
+        <g id="ticksOfficial"></g>
+        <line x1="100" y1="100" x2="100" y2="20" stroke="#00ff00" stroke-width="4" class="needle" id="needleOfficial"/>
+      </svg>
+      <div class="gauge-center"></div>
+      <div class="gauge-label" id="gaugeOfficialLabel">السرعة الرسمية</div>
+    </div>
+  </div>
+  <div class="road-name" id="roadName">جاري تحديد الطريق...</div>
+  <div class="status" id="status">جاري طلب إذن الموقع...</div>
+  <div class="link-info" id="infoLink">متفقين</div>
+
+<script>
+  // Draw ticks for gauges
+  function drawTicks(containerId) {
+    const container = document.getElementById(containerId);
+    for (let i = 0; i <= 10; i++) {
+      const angle = -90 + (i * 18); // span 180 degrees
+      const large = i % 5 === 0;
+      const len = large ? 10 : 5;
+      const rad = Math.PI * angle / 180;
+      const x1 = 100 + 80 * Math.cos(rad);
+      const y1 = 100 + 80 * Math.sin(rad);
+      const x2 = 100 + (80 - len) * Math.cos(rad);
+      const y2 = 100 + (80 - len) * Math.sin(rad);
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+      line.setAttribute('stroke', '#fff');
+      line.setAttribute('stroke-width', large ? '2' : '1');
+      container.appendChild(line);
+      // Label numbers
+      if (large) {
+        const tx = 100 + 65 * Math.cos(rad);
+        const ty = 100 + 65 * Math.sin(rad);
+        const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+        text.setAttribute('x', tx);
+        text.setAttribute('y', ty + 4);
+        text.setAttribute('fill', '#fff');
+        text.setAttribute('font-size', '12');
+        text.setAttribute('text-anchor', 'middle');
+        text.textContent = i * 20; // scale max 200 km/h
+        container.appendChild(text);
+      }
+    }
+  }
+
+  drawTicks('ticksCurrent');
+  drawTicks('ticksOfficial');
+
+  let officialSpeed = 0;
+  let warningPlayed = false;
+
+  function updateNeedle(needleId, speed) {
+    // speed 0-200 mapped to -90 to +90
+    const angle = -90 + (speed / 200) * 180;
+    document.getElementById(needleId).setAttribute('transform', 'rotate(' + angle + ' 100 100)');
+  }
+
+  // Show warning sound
+  function playWarning() {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1000, ctx.currentTime);
+    osc.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  }
+
+  function init() {
+    if (!navigator.geolocation) {
+      document.getElementById('status').textContent = 'المتصفح لا يدعم GPS';
+      return;
+    }
+    document.getElementById('status').textContent = 'جاري طلب إذن الموقع...';
+    navigator.geolocation.getCurrentPosition(pos => {
+      document.getElementById('status').textContent = 'جاري جلب بيانات...';
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const speedCurrent = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
+      updateNeedle('needleCurrent', speedCurrent);
+      document.getElementById('status').textContent = 'جاري تحديد الطريق...';
+
+      // Reverse geocoding using Nominatim for road name
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
+        .then(res => res.json())
+        .then(data => {
+          const components = data.address || {};
+          const roadName = components.road || data.display_name || 'غير معروف';
+          document.getElementById('roadName').textContent = roadName;
+          // Find official speed from OSM roads
+          fetchOSMRoads().then(() => {
+            const nearest = findNearestRoad(lat, lon);
+            if (nearest) {
+              officialSpeed = nearest.speed;
+              document.getElementById('gaugeOfficialLabel').textContent = nearest.name;
+              updateNeedle('needleOfficial', officialSpeed);
+            }
+            document.getElementById('status').textContent = 'جاهز';
+            // Watch position for live updates
+            navigator.geolocation.watchPosition(p => {
+              const sp = p.coords.speed ? Math.round(p.coords.speed * 3.6) : 0;
+              updateNeedle('needleCurrent', sp);
+              // Warning
+              if (sp > officialSpeed + 3 && !warningPlayed) {
+                playWarning();
+                warningPlayed = true;
+              }
+              if (sp <= officialSpeed + 3) {
+                warningPlayed = false;
+              }
+            }, err => {
+              console.error(err);
+            }, { enableHighAccuracy: true, maximumAge: 1000 });
+          });
+        });
+    }, error => {
+      document.getElementById('status').textContent = 'تم رفض الإذن أو خطأ في تحديد الموقع';
+      console.error(error);
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  }
+
+  // Fetch OSM roads via Overpass API
+  let osmRoads = [];
+  function fetchOSMRoads() {
+    const query = `
+      [out:json][timeout:25];
+      area["name"="Riyadh"]["boundary"="administrative"]->.searchArea;
+      (
+        way["highway"](area.searchArea);
+      );
+      out center tags;
+    `;
+    return fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST', body: query,
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
+    })
+    .then(res => res.json())
+    .then(data => {
+      osmRoads = data.elements.map(el => {
+        const tags = el.tags || {};
+        return {
+          lat: el.center.lat,
+          lon: el.center.lon,
+          name: tags.name || null,
+          speed: tags.maxspeed ? parseInt(tags.maxspeed) : getDefaultSpeed(tags.highway)
+        };
+      });
+    });
+  }
+
+  function getDefaultSpeed(highway) {
+    switch(highway) {
+      case 'motorway': return 100;
+      case 'trunk': return 90;
+      case 'primary': return 75;
+      case 'secondary': return 65;
+      case 'tertiary': return 60;
+      case 'residential': return 40;
+      case 'service': return 50;
+      case 'unclassified': return 50;
+      case 'living_street': return 30;
+      default: return 50;
+    }
+  }
+
+  function findNearestRoad(lat, lon) {
+    let minDist = Infinity, nearest = null;
+    osmRoads.forEach(r => {
+      const d = getDistance(lat, lon, r.lat, r.lon);
+      if (d < minDist) { minDist = d; nearest = r; }
+    });
+    return nearest;
+  }
+
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(Δφ/2)*Math.sin(Δφ/2) +
+              Math.cos(φ1)*Math.cos(φ2) *
+              Math.sin(Δλ/2)*Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  document.getElementById('infoLink').onclick = () => {
+    window.location.href = 'info.html';
+  };
+
+  window.onload = init;
+</script>
+</body>
+</html>
