@@ -1,295 +1,918 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>عداد السرعة - الرياض</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #1c1c1c;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-    }
-    .gauges-container {
-      display: flex;
-      justify-content: space-around;
-      width: 100%;
-      max-width: 900px;
-    }
-    .gauge {
-      position: relative;
-      width: 300px;
-      height: 300px;
-    }
-    .gauge svg {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-    }
-    .needle {
-      transform-origin: 50% 50%;
-      transition: transform 0.2s ease-out;
-    }
-    .gauge-center {
-      position: absolute;
-      width: 20px; height: 20px;
-      background: #444;
-      border: 4px solid #888;
-      border-radius: 50%;
-      top: calc(50% - 10px);
-      left: calc(50% - 10px);
-      z-index: 2;
-    }
-    .gauge-label {
-      position: absolute;
-      width: 100%;
-      text-align: center;
-      bottom: 10px;
-      font-size: 1.2rem;
-      color: #ffcc00;
-    }
-    .road-name {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      color: #00ffff;
-      text-align: center;
-    }
-    .status {
-      margin-top: 10px;
-      font-size: 1rem;
-      color: #92fe9d;
-      text-align: center;
-    }
-    .link-info {
-      margin-top: 20px;
-      font-size: 1rem;
-      color: #00c9ff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول امتحانات كلية الطب - جامعة السودان الدولية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Naskh Arabic', serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c1445, #1c1f3d, #0c1445);
+            background-size: 400% 400%;
+            animation: gradientBG 18s ease infinite;
+            color: #e6e6ff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .moon-bg {
+            position: fixed;
+            top: 10%;
+            left: 5%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #f9f3d0 0%, #e8dca4 30%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0.15;
+            filter: blur(20px);
+            z-index: 1;
+            animation: floatMoon 25s ease-in-out infinite;
+        }
+        
+        .moon-bg:nth-child(2) {
+            top: 70%;
+            left: 80%;
+            width: 200px;
+            height: 200px;
+            animation-delay: 5s;
+        }
+        
+        @keyframes floatMoon {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(20px, 30px); }
+            50% { transform: translate(40px, 10px); }
+            75% { transform: translate(10px, 40px); }
+            100% { transform: translate(0, 0); }
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(10, 15, 40, 0.85);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            color: #f0f0ff;
+            border: 1px solid rgba(120, 130, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 3;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #6a5af9, #d66efd, #6a5af9);
+            animation: headerGlow 3s linear infinite;
+        }
+        
+        @keyframes headerGlow {
+            0% { background-position: 0 0; }
+            100% { background-position: 200px 0; }
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            letter-spacing: 1px;
+        }
+        
+        header h2 {
+            font-size: 2rem;
+            color: #a5d6ff;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .university {
+            font-size: 1.8rem;
+            color: #c0e6ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .university i {
+            color: #ffd700;
+            font-size: 2.2rem;
+        }
+        
+        .exam-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(15, 20, 60, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(100, 110, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 3;
+        }
+        
+        .exam-info::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(106, 90, 249, 0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+            animation: rotateBg 60s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotateBg {
+            0% { transform: rotate(0); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .next-exam {
+            flex: 1;
+            padding: 25px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #6a5af9, #d66efd);
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(106, 90, 249, 0.5);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+        
+        .next-exam::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            100% { transform: translateX(100%); }
+        }
+        
+        .next-exam h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .next-exam h3 i {
+            font-size: 2.2rem;
+            color: #ffd700;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .subject {
+            font-size: 1.8rem;
+            margin: 15px 0;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .date, .time {
+            font-size: 1.4rem;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            border-radius: 12px;
+            min-width: 100px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .countdown-value {
+            font-size: 2.8rem;
+            font-weight: bold;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #fff, #d4d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .countdown-label {
+            font-size: 1.1rem;
+            margin-top: 8px;
+            color: #ffd700;
+            font-weight: 500;
+        }
+        
+        .exam-table-container {
+            background: rgba(15, 20, 60, 0.8);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            margin-bottom: 40px;
+            overflow-x: auto;
+            border: 1px solid rgba(100, 110, 255, 0.2);
+            position: relative;
+            z-index: 3;
+        }
+        
+        .exam-table-container h2 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 20px 25px;
+            text-align: center;
+            border-bottom: 1px solid rgba(100, 110, 255, 0.2);
+        }
+        
+        th {
+            background: linear-gradient(to right, #3a2f8d, #4a3f9d);
+            color: #ffd700;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-top: 1px solid rgba(100, 110, 255, 0.2);
+            position: sticky;
+            top: 0;
+        }
+        
+        th:first-child {
+            border-top-left-radius: 15px;
+            border-right: 1px solid rgba(100, 110, 255, 0.2);
+        }
+        
+        th:last-child {
+            border-top-right-radius: 15px;
+        }
+        
+        tr {
+            background: rgba(25, 30, 70, 0.6);
+            transition: all 0.3s ease;
+        }
+        
+        tr:nth-child(even) {
+            background: rgba(20, 25, 65, 0.7);
+        }
+        
+        tr:hover {
+            background: rgba(40, 45, 100, 0.8);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .closest-exam {
+            background: linear-gradient(135deg, rgba(200, 50, 50, 0.3), rgba(150, 30, 30, 0.4)) !important;
+            position: relative;
+            animation: highlight 2s infinite;
+        }
+        
+        .closest-exam::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, #ff4d4d, #ff1a1a);
+        }
+        
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 50, 50, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0); }
+        }
+        
+        .time-remaining {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+        
+        .time-box {
+            background: linear-gradient(135deg, #3a2f8d, #4a3f9d);
+            padding: 8px 15px;
+            border-radius: 8px;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(100, 110, 255, 0.3);
+        }
+        
+        .exam-passed {
+            color: #8888cc;
+            position: relative;
+        }
+        
+        .exam-passed::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ff4d4d, transparent);
+        }
+        
+        .next-exam-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .next-exam-info h4 {
+            font-size: 1.4rem;
+            color: #a5d6ff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .next-exam-details {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .next-exam-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(25, 30, 70, 0.5);
+            border-radius: 8px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .next-exam-title {
+            font-size: 1.1rem;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+        
+        .next-exam-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .coordinator-section {
+            background: rgba(15, 20, 60, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(100, 110, 255, 0.2);
+            position: relative;
+            z-index: 3;
+        }
+        
+        .coordinator-section h3 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .coordinators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .coordinator {
+            background: linear-gradient(135deg, #3a2f8d, #4a3f9d);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(100, 110, 255, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .coordinator:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .coordinator h4 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .coordinator p {
+            font-size: 1.3rem;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid #ffd700;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(10, 15, 40, 0.85);
+            border-radius: 20px;
+            color: #c0c0ff;
+            margin-top: 40px;
+            font-size: 1.2rem;
+            border: 1px solid rgba(100, 110, 255, 0.2);
+            position: relative;
+            z-index: 3;
+        }
+        
+        footer p {
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 992px) {
+            .exam-info {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .countdown-box {
+                min-width: 80px;
+                padding: 12px 15px;
+            }
+            
+            .countdown-value {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            header h2 {
+                font-size: 1.6rem;
+            }
+            
+            .university {
+                font-size: 1.4rem;
+            }
+            
+            th, td {
+                padding: 15px;
+                font-size: 1rem;
+            }
+            
+            .subject {
+                font-size: 1.5rem;
+            }
+            
+            .date, .time {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="gauges-container">
-    <!-- Current Speed Gauge -->
-    <div class="gauge" id="currentGauge">
-      <svg viewBox="0 0 200 200">
-        <!-- Outer arc -->
-        <path d="M20,100 A80,80 0 0,1 180,100" stroke="#444" stroke-width="8" fill="none"/>
-        <!-- Ticks -->
-        <g id="ticksCurrent"></g>
-        <!-- Needle -->
-        <line x1="100" y1="100" x2="100" y2="20" stroke="#ff0000" stroke-width="4" class="needle" id="needleCurrent"/>
-      </svg>
-      <div class="gauge-center"></div>
-      <div class="gauge-label">السرعة الحالية</div>
+    <!-- خلفية النجوم -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- خلفية القمر -->
+    <div class="moon-bg"></div>
+    <div class="moon-bg"></div>
+    
+    <div class="container">
+        <header>
+            <div class="university">
+                <i class="fas fa-university"></i> جامعة السودان الدولية / كلية حياة الجامعية
+            </div>
+            <h2>جدول الامتحانات النهائية</h2>
+        </header>
+        
+        <div class="exam-info">
+            <div class="next-exam">
+                <h3><i class="fas fa-bell"></i> أقرب اختبار قادم</h3>
+                <div class="subject">فسيولوجيا (II)</div>
+                <div class="date"><i class="fas fa-calendar-day"></i> الأحد 06/07/2025</div>
+                <div class="time"><i class="fas fa-clock"></i> 09:00 صباحاً - 12:00 ظهراً</div>
+                
+                <div class="countdown">
+                    <div class="countdown-box">
+                        <div class="countdown-value" id="days">00</div>
+                        <div class="countdown-label">أيام</div>
+                    </div>
+                    <div class="countdown-box">
+                        <div class="countdown-value" id="hours">00</div>
+                        <div class="countdown-label">ساعات</div>
+                    </div>
+                    <div class="countdown-box">
+                        <div class="countdown-value" id="minutes">00</div>
+                        <div class="countdown-label">دقائق</div>
+                    </div>
+                    <div class="countdown-box">
+                        <div class="countdown-value" id="seconds">00</div>
+                        <div class="countdown-label">ثواني</div>
+                    </div>
+                </div>
+                
+                <!-- قسم الاختبار التالي -->
+                <div class="next-exam-info">
+                    <h4><i class="fas fa-forward"></i> الاختبار التالي</h4>
+                    <div class="next-exam-details">
+                        <div class="next-exam-item">
+                            <div class="next-exam-title">المادة</div>
+                            <div class="next-exam-value" id="next-subject">تشريح (II)</div>
+                        </div>
+                        <div class="next-exam-item">
+                            <div class="next-exam-title">التاريخ</div>
+                            <div class="next-exam-value" id="next-date">09/07/2025</div>
+                        </div>
+                        <div class="next-exam-item">
+                            <div class="next-exam-title">الوقت</div>
+                            <div class="next-exam-value" id="next-time">09:00 صباحاً</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="exam-table-container">
+            <h2><i class="fas fa-calendar-alt"></i> جدول الامتحانات</h2>
+            <table id="examTable">
+                <thead>
+                    <tr>
+                        <th>اليوم / التاريخ</th>
+                        <th>المادة</th>
+                        <th>الوقت</th>
+                        <th>الوقت المتبقي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم ملء هذا القسم بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    
+        <footer>
+            <p><i class="fas fa-envelope"></i> OSAMA</p>
+            <p>جميع الحقوق محفوظة MW © 2025 </p>
+        </footer>
     </div>
-    <!-- Official Speed Gauge -->
-    <div class="gauge" id="officialGauge">
-      <svg viewBox="0 0 200 200">
-        <path d="M20,100 A80,80 0 0,1 180,100" stroke="#444" stroke-width="8" fill="none"/>
-        <g id="ticksOfficial"></g>
-        <line x1="100" y1="100" x2="100" y2="20" stroke="#00ff00" stroke-width="4" class="needle" id="needleOfficial"/>
-      </svg>
-      <div class="gauge-center"></div>
-      <div class="gauge-label" id="gaugeOfficialLabel">السرعة الرسمية</div>
-    </div>
-  </div>
-  <div class="road-name" id="roadName">جاري تحديد الطريق...</div>
-  <div class="status" id="status">جاري طلب إذن الموقع...</div>
-  <div class="link-info" id="infoLink">متفقين</div>
 
-<script>
-  // Draw ticks for gauges
-  function drawTicks(containerId) {
-    const container = document.getElementById(containerId);
-    for (let i = 0; i <= 10; i++) {
-      const angle = -90 + (i * 18); // span 180 degrees
-      const large = i % 5 === 0;
-      const len = large ? 10 : 5;
-      const rad = Math.PI * angle / 180;
-      const x1 = 100 + 80 * Math.cos(rad);
-      const y1 = 100 + 80 * Math.sin(rad);
-      const x2 = 100 + (80 - len) * Math.cos(rad);
-      const y2 = 100 + (80 - len) * Math.sin(rad);
-      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1', x1);
-      line.setAttribute('y1', y1);
-      line.setAttribute('x2', x2);
-      line.setAttribute('y2', y2);
-      line.setAttribute('stroke', '#fff');
-      line.setAttribute('stroke-width', large ? '2' : '1');
-      container.appendChild(line);
-      // Label numbers
-      if (large) {
-        const tx = 100 + 65 * Math.cos(rad);
-        const ty = 100 + 65 * Math.sin(rad);
-        const text = document.createElementNS('http://www.w3.org/2000/svg','text');
-        text.setAttribute('x', tx);
-        text.setAttribute('y', ty + 4);
-        text.setAttribute('fill', '#fff');
-        text.setAttribute('font-size', '12');
-        text.setAttribute('text-anchor', 'middle');
-        text.textContent = i * 20; // scale max 200 km/h
-        container.appendChild(text);
-      }
-    }
-  }
-
-  drawTicks('ticksCurrent');
-  drawTicks('ticksOfficial');
-
-  let officialSpeed = 0;
-  let warningPlayed = false;
-
-  function updateNeedle(needleId, speed) {
-    // speed 0-200 mapped to -90 to +90
-    const angle = -90 + (speed / 200) * 180;
-    document.getElementById(needleId).setAttribute('transform', 'rotate(' + angle + ' 100 100)');
-  }
-
-  // Show warning sound
-  function playWarning() {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(1000, ctx.currentTime);
-    osc.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.5);
-  }
-
-  function init() {
-    if (!navigator.geolocation) {
-      document.getElementById('status').textContent = 'المتصفح لا يدعم GPS';
-      return;
-    }
-    document.getElementById('status').textContent = 'جاري طلب إذن الموقع...';
-    navigator.geolocation.getCurrentPosition(pos => {
-      document.getElementById('status').textContent = 'جاري جلب بيانات...';
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      const speedCurrent = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
-      updateNeedle('needleCurrent', speedCurrent);
-      document.getElementById('status').textContent = 'جاري تحديد الطريق...';
-
-      // Reverse geocoding using Nominatim for road name
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
-        .then(res => res.json())
-        .then(data => {
-          const components = data.address || {};
-          const roadName = components.road || data.display_name || 'غير معروف';
-          document.getElementById('roadName').textContent = roadName;
-          // Find official speed from OSM roads
-          fetchOSMRoads().then(() => {
-            const nearest = findNearestRoad(lat, lon);
-            if (nearest) {
-              officialSpeed = nearest.speed;
-              document.getElementById('gaugeOfficialLabel').textContent = nearest.name;
-              updateNeedle('needleOfficial', officialSpeed);
+    <script>
+        // إنشاء النجوم العشوائية
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // خصائص عشوائية للنجوم
+                const size = Math.random() * 3;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const duration = 2 + Math.random() * 5;
+                const delay = Math.random() * 5;
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.setProperty('--duration', `${duration}s`);
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
             }
-            document.getElementById('status').textContent = 'جاهز';
-            // Watch position for live updates
-            navigator.geolocation.watchPosition(p => {
-              const sp = p.coords.speed ? Math.round(p.coords.speed * 3.6) : 0;
-              updateNeedle('needleCurrent', sp);
-              // Warning
-              if (sp > officialSpeed + 3 && !warningPlayed) {
-                playWarning();
-                warningPlayed = true;
-              }
-              if (sp <= officialSpeed + 3) {
-                warningPlayed = false;
-              }
-            }, err => {
-              console.error(err);
-            }, { enableHighAccuracy: true, maximumAge: 1000 });
-          });
+        }
+        
+        // بيانات الامتحانات
+        const exams = [
+            {
+                day: "الأحد",
+                date: "06/07/2025",
+                subject: "فسيولوجيا (II)",
+                time: "09:00 – 12:00 صباحاً",
+                coordinator: "د. أحمد محمد حسن"
+            },
+            {
+                day: "الأربعاء",
+                date: "09/07/2025",
+                subject: "تشريح (II)",
+                time: "09:00 – 12:00 صباحاً",
+                coordinator: "د. سارة عبد الرحيم"
+            },
+            {
+                day: "السبت",
+                date: "12/07/2025",
+                subject: "كيمياء حيوية (II)",
+                time: "09:00 – 12:00 صباحاً",
+                coordinator: "د. عمر خالد"
+            },
+            {
+                day: "الاثنين",
+                date: "14/07/2025",
+                subject: "مجتمع (III)",
+                time: "09:00 – 12:00 صباحاً",
+                coordinator: "د. فاطمة الزهراء"
+            },
+            {
+                day: "الأربعاء",
+                date: "16/07/2025",
+                subject: "مهارات سريرية أساسية (II)",
+                time: "09:00 – 12:00 صباحاً",
+                coordinator: "د. نورا إبراهيم"
+            },
+            {
+                day: "الخميس",
+                date: "17/07/2025",
+                subject: "لغة إنجليزية (I + II)",
+                time: "01:00 – 04:00 ظهراً",
+                coordinator: "د. جيمس ويلسون"
+            }
+        ];
+
+        // دالة لتنسيق الوقت المتبقي
+        function formatTimeRemaining(diff) {
+            if (diff <= 0) {
+                return { passed: true, text: "تم الانتهاء" };
+            }
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            return {
+                passed: false,
+                days,
+                hours,
+                minutes,
+                seconds,
+                text: `${days} يوم, ${hours} ساعة, ${minutes} دقيقة`
+            };
+        }
+
+        // دالة لتحديث الجدول والاختبارات
+        function updateExamTable() {
+            const tableBody = document.querySelector("#examTable tbody");
+            tableBody.innerHTML = "";
+            
+            let closestExam = null;
+            let nextExam = null;
+            let minDiff = Infinity;
+            let nextMinDiff = Infinity;
+            const now = new Date();
+            
+            exams.forEach((exam, index) => {
+                const [day, month, year] = exam.date.split('/').map(Number);
+                let hour = 9;
+                if (exam.subject.includes("لغة إنجليزية")) {
+                    hour = 13; // 1:00 ظهراً
+                }
+                
+                const examDate = new Date(year, month - 1, day, hour);
+                const diff = examDate - now;
+                
+                const timeRemaining = formatTimeRemaining(diff);
+                
+                const row = document.createElement("tr");
+                
+                // تحديد أقرب اختبار لم ينته بعد
+                if (diff > 0 && diff < minDiff) {
+                    minDiff = diff;
+                    closestExam = exam;
+                    row.classList.add("closest-exam");
+                    
+                    // تحديد الاختبار التالي (الثاني في الترتيب)
+                    if (index < exams.length - 1) {
+                        const nextExamData = exams[index + 1];
+                        const [nextDay, nextMonth, nextYear] = nextExamData.date.split('/').map(Number);
+                        let nextHour = 9;
+                        if (nextExamData.subject.includes("لغة إنجليزية")) {
+                            nextHour = 13;
+                        }
+                        const nextExamDate = new Date(nextYear, nextMonth - 1, nextDay, nextHour);
+                        const nextDiff = nextExamDate - now;
+                        
+                        if (nextDiff > 0) {
+                            nextExam = nextExamData;
+                            nextMinDiff = nextDiff;
+                        }
+                    }
+                }
+                
+                // إذا انتهى الامتحان
+                if (timeRemaining.passed) {
+                    row.classList.add("exam-passed");
+                    
+                    // إذا كان هذا الامتحان قد انتهى، نبحث عن التالي
+                    if (index < exams.length - 1) {
+                        const nextExamData = exams[index + 1];
+                        const [nextDay, nextMonth, nextYear] = nextExamData.date.split('/').map(Number);
+                        let nextHour = 9;
+                        if (nextExamData.subject.includes("لغة إنجليزية")) {
+                            nextHour = 13;
+                        }
+                        const nextExamDate = new Date(nextYear, nextMonth - 1, nextDay, nextHour);
+                        const nextDiff = nextExamDate - now;
+                        
+                        if (nextDiff > 0 && nextDiff < nextMinDiff) {
+                            nextExam = nextExamData;
+                            nextMinDiff = nextDiff;
+                        }
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td>${exam.day} ${exam.date}</td>
+                    <td>${exam.subject}</td>
+                    <td>${exam.time}</td>
+                    <td>
+                        ${timeRemaining.passed ? 
+                            '<span style="color: #8888cc;">تم الانتهاء</span>' : 
+                            `<div class="time-remaining">
+                                <div class="time-box">${timeRemaining.days} يوم</div>
+                                <div class="time-box">${timeRemaining.hours} ساعة</div>
+                                <div class="time-box">${timeRemaining.minutes} دقيقة</div>
+                            </div>`
+                        }
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // تحديث قسم أقرب امتحان
+            if (closestExam) {
+                const [day, month, year] = closestExam.date.split('/').map(Number);
+                let hour = 9;
+                if (closestExam.subject.includes("لغة إنجليزية")) {
+                    hour = 13;
+                }
+                const examDate = new Date(year, month - 1, day, hour);
+                updateCountdown(examDate, closestExam);
+            } else {
+                // إذا لم يكن هناك امتحانات قادمة
+                document.querySelector(".next-exam .subject").textContent = "لا توجد امتحانات قادمة";
+                document.querySelector(".next-exam .date").textContent = "";
+                document.querySelector(".next-exam .time").textContent = "";
+                document.getElementById("days").textContent = "00";
+                document.getElementById("hours").textContent = "00";
+                document.getElementById("minutes").textContent = "00";
+                document.getElementById("seconds").textContent = "00";
+            }
+            
+            // تحديث قسم الاختبار التالي
+            if (nextExam) {
+                document.getElementById("next-subject").textContent = nextExam.subject;
+                document.getElementById("next-date").textContent = nextExam.date;
+                document.getElementById("next-time").textContent = nextExam.time;
+            } else {
+                document.getElementById("next-subject").textContent = "لا يوجد";
+                document.getElementById("next-date").textContent = "--/--/----";
+                document.getElementById("next-time").textContent = "--:--";
+            }
+        }
+
+        // دالة لتحديث العد التنازلي
+        function updateCountdown(examDate, exam) {
+            const now = new Date();
+            const diff = examDate - now;
+            
+            if (diff <= 0) {
+                // إذا انتهى الوقت، سيتم تحديث الجدول في التكرار القادم
+                return;
+            }
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById("days").textContent = days.toString().padStart(2, '0');
+            document.getElementById("hours").textContent = hours.toString().padStart(2, '0');
+            document.getElementById("minutes").textContent = minutes.toString().padStart(2, '0');
+            document.getElementById("seconds").textContent = seconds.toString().padStart(2, '0');
+            
+            document.querySelector(".next-exam .subject").textContent = exam.subject;
+            document.querySelector(".next-exam .date").textContent = `${exam.day} ${exam.date}`;
+            document.querySelector(".next-exam .time").textContent = exam.time;
+        }
+
+        // تحديث الجدول والعد التنازلي كل ثانية
+        setInterval(() => {
+            updateExamTable();
+        }, 1000);
+
+        // التهيئة الأولية
+        document.addEventListener("DOMContentLoaded", () => {
+            createStars();
+            updateExamTable();
         });
-    }, error => {
-      document.getElementById('status').textContent = 'تم رفض الإذن أو خطأ في تحديد الموقع';
-      console.error(error);
-    }, { enableHighAccuracy: true, timeout: 10000 });
-  }
-
-  // Fetch OSM roads via Overpass API
-  let osmRoads = [];
-  function fetchOSMRoads() {
-    const query = `
-      [out:json][timeout:25];
-      area["name"="Riyadh"]["boundary"="administrative"]->.searchArea;
-      (
-        way["highway"](area.searchArea);
-      );
-      out center tags;
-    `;
-    return fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST', body: query,
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
-    })
-    .then(res => res.json())
-    .then(data => {
-      osmRoads = data.elements.map(el => {
-        const tags = el.tags || {};
-        return {
-          lat: el.center.lat,
-          lon: el.center.lon,
-          name: tags.name || null,
-          speed: tags.maxspeed ? parseInt(tags.maxspeed) : getDefaultSpeed(tags.highway)
-        };
-      });
-    });
-  }
-
-  function getDefaultSpeed(highway) {
-    switch(highway) {
-      case 'motorway': return 100;
-      case 'trunk': return 90;
-      case 'primary': return 75;
-      case 'secondary': return 65;
-      case 'tertiary': return 60;
-      case 'residential': return 40;
-      case 'service': return 50;
-      case 'unclassified': return 50;
-      case 'living_street': return 30;
-      default: return 50;
-    }
-  }
-
-  function findNearestRoad(lat, lon) {
-    let minDist = Infinity, nearest = null;
-    osmRoads.forEach(r => {
-      const d = getDistance(lat, lon, r.lat, r.lon);
-      if (d < minDist) { minDist = d; nearest = r; }
-    });
-    return nearest;
-  }
-
-  function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3;
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(Δφ/2)*Math.sin(Δφ/2) +
-              Math.cos(φ1)*Math.cos(φ2) *
-              Math.sin(Δλ/2)*Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-
-  document.getElementById('infoLink').onclick = () => {
-    window.location.href = 'info.html';
-  };
-
-  window.onload = init;
-</script>
+    </script>
 </body>
 </html>
